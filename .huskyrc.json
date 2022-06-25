@@ -1,0 +1,5 @@
+{
+  "hooks": {
+    "pre-commit": "env FORCE_COLOR=1 lint-staged"
+  }
+}
