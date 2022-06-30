@@ -18,7 +18,7 @@ services:
       - ./dist:/usr/src/dicty/dist
       - ./package.json:/usr/src/dicty/package.json
     ports:
-      - "5050:5050"
+      - "5000:5000"
       - "9222:9222"
     links:
       - mongo
