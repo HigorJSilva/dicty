@@ -4,13 +4,12 @@
       "type": "node",
       "request": "attach",
       "name": "Attach to Node",
-      "port": 9222,
-      "restart": true
+      "processId": "${command:PickProcess}",
     }, {
       "name": "Docker attach to node",
       "type": "node",
       "request": "attach",
-      "remoteRoot": "/usr/src/clean-node-api",
+      "remoteRoot": "/usr/src/dicty",
       "port": 9222,
       "restart": true
     }
