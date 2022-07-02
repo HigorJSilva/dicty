@@ -1,5 +1,7 @@
 export const requiredMessage = 'Required field'
 export const invalidEmailMessage = 'Invalid e-mail'
+export const uniqueMessage = (resource: string): string => { return `${resource} already in use` }
+
 export const resourceNotFound = (resource: string): Error => {
   return new ValidationError(`${resource} not found`)
 }

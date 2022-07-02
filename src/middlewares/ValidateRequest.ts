@@ -12,7 +12,7 @@ export function validateRequest (
   if (!errors.isEmpty()) {
     const errorsArray = handleErrorMessage(errors.array())
 
-    res.status(422).json(ApiResponse(false, 'Falha na requisição', null, errorsArray))
+    res.status(422).json(ApiResponse(false, 'Bad request', null, errorsArray))
     return
   }
 
