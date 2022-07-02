@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
+import env from './env'
 
-const url = 'mongodb://mongo:27017/dicty'
+const url = env.mongoUrl
 
 export class MongoDB {
   database: any
