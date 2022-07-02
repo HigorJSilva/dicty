@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose'
+import { DocumentResult } from './MongooseDocumentModel'
 
-export interface UserModel extends mongoose.Document {
+export interface UserModel extends DocumentResult<UserModel> {
   id: string
   username: string
   email: string
@@ -15,11 +16,11 @@ export interface ProtectedUserModel {
 };
 
 export const UserSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: true
   },
-  username: {
+  email: {
     type: String,
     required: true
   },
@@ -29,7 +30,7 @@ export const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    required: true
+    default: 'user'
   }
 })
 

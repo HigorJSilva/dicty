@@ -16,11 +16,12 @@ export async function register (req: Request, res: Response, next: NextFunction)
     return res.status(422).json(ApiResponse(false, null, null, userRegister))
   } catch (error) {
     const err = error as Error
+
     if (err.name === 'ValidationError') {
       next(res.status(422).json(ApiResponse(false, null, null, [err.message] ?? [''])))
     }
 
-    next(res.status(500).json(ApiResponse(false, err.stack ?? 'undefined Stack', null, null)))
+    next(res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? [''])))
     return null
   }
 }
