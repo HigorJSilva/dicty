@@ -1,6 +1,10 @@
+import { LoginRequest } from '@/middlewares/interfaces/LoginRequest'
 import { RegisterUserRequest } from '@/middlewares/interfaces/RegisterUserRequest'
 import User, { ProtectedUserModel, UserModel } from '@/models/UserModel'
-import bcrypt from 'bcrypt'
+import env from '@/config/env'
+import bcrypt, { compareSync } from 'bcrypt'
+import * as jwt from 'jsonwebtoken'
+import { resourceNotFound, ValidationError } from '@/helpers/ErrorMessages'
 
 export async function store (userData: RegisterUserRequest): Promise<ProtectedUserModel> {
   try {
@@ -11,6 +15,30 @@ export async function store (userData: RegisterUserRequest): Promise<ProtectedUs
 
     return protectedUser
   } catch (error) {
+    throw new Error((error as Error).message)
+  }
+}
+
+export async function authenticate (loginData: LoginRequest): Promise< {user: ProtectedUserModel, token: string} | Error> {
+  try {
+    const user = await User.findOne({ where: { email: loginData.email } })
+
+    if (!user) {
+      throw resourceNotFound('Email')
+    }
+
+    if (!compareSync(loginData.password, user.password)) {
+      throw new ValidationError('Invalid Credentials')
+    }
+    const { password, role, ...protectedUser } = user._doc
+    const token = jwt.sign(protectedUser, env.jwtSecret)
+
+    return { user: protectedUser, token }
+  } catch (error) {
+    const err = error as Error
+    if (err.name === 'ValidationError') {
+      return new Error(err.message)
+    }
     throw new Error((error as Error).message)
   }
 }

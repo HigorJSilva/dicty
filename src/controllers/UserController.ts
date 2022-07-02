@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/middlewares/helpers/HttpResponse'
 import { getFilteredRequest } from '@/middlewares/helpers/utils'
+import { LoginRequest } from '@/middlewares/interfaces/LoginRequest'
 import { RegisterUserRequest } from '@/middlewares/interfaces/RegisterUserRequest'
 import { NextFunction, Request, Response } from 'express'
 import * as UserService from '../services/UserService'
@@ -20,6 +21,24 @@ export async function register (req: Request, res: Response, next: NextFunction)
     if (err.name === 'ValidationError') {
       next(res.status(422).json(ApiResponse(false, null, null, [err.message] ?? [''])))
     }
+
+    next(res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? [''])))
+    return null
+  }
+}
+
+export async function auth (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
+  const filteredRequest: LoginRequest = getFilteredRequest(req) as LoginRequest
+  try {
+    const userLogin = await UserService.authenticate(filteredRequest)
+
+    if (userLogin instanceof Error) {
+      return res.status(422).json(ApiResponse(false, userLogin.message, null, null))
+    }
+
+    return res.status(200).json(ApiResponse(true, null, userLogin, null))
+  } catch (error) {
+    const err = error as Error
 
     next(res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? [''])))
     return null
