@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { DocumentResult } from './MongooseDocumentModel'
 
 export interface TermModel extends DocumentResult<TermModel> {
@@ -34,7 +34,7 @@ const AnswerSchema = new mongoose.Schema({
     required: true
   },
   termId: {
-    type: String,
+    type: Types.ObjectId,
     required: true
   }
 })
