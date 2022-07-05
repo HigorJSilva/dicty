@@ -7,7 +7,7 @@ function errorHandler (err: TypeError, req: Request, res: Response, next: NextFu
     res.status(403).json(
       ApiResponse(
         false,
-        'Usuário não autorizado',
+        'User not authorized',
         null,
         null
       )
@@ -19,7 +19,7 @@ function errorHandler (err: TypeError, req: Request, res: Response, next: NextFu
     res.status(401).json(
       ApiResponse(
         false,
-        'Usuário não autenticado',
+        'User not authenticated',
         null,
         null
       )
