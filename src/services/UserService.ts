@@ -1,5 +1,5 @@
-import { LoginRequest } from '@/middlewares/interfaces/LoginRequest'
-import { RegisterUserRequest } from '@/middlewares/interfaces/RegisterUserRequest'
+import { LoginRequest } from '@/middlewares/interfaces/user/LoginRequest'
+import { RegisterUserRequest } from '@/middlewares/interfaces/user/RegisterUserRequest'
 import User, { ProtectedUserModel, UserModel } from '@/models/UserModel'
 import env from '@/config/env'
 import bcrypt, { compareSync } from 'bcrypt'

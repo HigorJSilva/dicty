@@ -1,7 +1,7 @@
 import { ApiResponse } from '@/middlewares/helpers/HttpResponse'
 import { getFilteredRequest } from '@/middlewares/helpers/utils'
-import { LoginRequest } from '@/middlewares/interfaces/LoginRequest'
-import { RegisterUserRequest } from '@/middlewares/interfaces/RegisterUserRequest'
+import { LoginRequest } from '@/middlewares/interfaces/user/LoginRequest'
+import { RegisterUserRequest } from '@/middlewares/interfaces/user/RegisterUserRequest'
 import { NextFunction, Request, Response } from 'express'
 import * as UserService from '../services/UserService'
 

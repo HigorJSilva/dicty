@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express'
 import errorHandler from '../helpers/ErrorHandler'
 import env from '@/config/env'
 import User, { UserModel } from '@/models/UserModel'
-import { JwtInterface } from './interfaces/jwtInterface'
+import { JwtInterface } from './interfaces/user/jwtInterface'
 
 export function authorize (roles: string[] | string = []): any {
   if (typeof roles === 'string') {

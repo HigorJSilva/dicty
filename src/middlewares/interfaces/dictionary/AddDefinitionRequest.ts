@@ -1,4 +1,4 @@
-import { Request } from '../helpers/Request'
+import { Request } from '../../helpers/Request'
 
 export interface AddDefinitionRequest extends Request {
   term: string
