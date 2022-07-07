@@ -22,3 +22,11 @@ export const UpdateDefinitionRequest = [
     .isMongoId()
     .custom(async (value: string) => await exists(value, Term, '_id'))
 ]
+
+export const DeleteDefinitionRequest = [
+  ...AuthenticatedUserRequest,
+  param('termId')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isMongoId()
+    .custom(async (value: string) => await exists(value, Term, '_id'))
+]
