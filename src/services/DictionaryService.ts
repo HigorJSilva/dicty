@@ -55,11 +55,11 @@ export async function update (dictionaryData: UpdateDefinitionRequest): Promise<
   })
 
   if (!termToUpdate) {
-    throw new Error('')
+    throw new Error('UpdateDefinitionRequest failed exists for Term id')
   }
 
   if (!updatedAnswer) {
-    throw new Error('')
+    throw new Error('UpdateDefinitionRequest failed exists for Term id or no default answer found')
   }
 
   return {
