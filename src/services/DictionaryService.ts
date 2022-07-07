@@ -1,4 +1,5 @@
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
+import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
 
@@ -65,4 +66,10 @@ export async function update (dictionaryData: UpdateDefinitionRequest): Promise<
     term: termToUpdate._doc,
     answers: [updatedAnswer._doc]
   }
+}
+
+export async function remove (dictionaryData: DeleteDefinitionRequest): Promise<boolean> {
+  await Answer.deleteMany({ termId: dictionaryData.termId })
+  await Term.findOneAndDelete(dictionaryData.termId)
+  return true
 }
