@@ -16,14 +16,9 @@ export const AddDefinitionRequest = [
 
 export const UpdateDefinitionRequest = [
   ...AuthenticatedUserRequest,
+  ...AddDefinitionRequest,
   param('termId')
     .notEmpty().withMessage(requiredMessage).bail()
     .isMongoId()
-    .custom(async (value: string) => await exists(value, Term, '_id')),
-  body('term')
-    .notEmpty().withMessage(requiredMessage).bail()
-    .isLength({ min: 2 }).withMessage(fieldSizeMessage(2)),
-  body('answer')
-    .notEmpty().withMessage(requiredMessage).bail()
-    .isLength({ min: 5 }).withMessage(fieldSizeMessage(5))
+    .custom(async (value: string) => await exists(value, Term, '_id'))
 ]
