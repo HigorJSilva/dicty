@@ -1,4 +1,5 @@
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
+import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
 
 export async function list (): Promise<DictionaryModel[]> {
@@ -43,12 +44,25 @@ export async function store (dictionaryData: AddDefinitionRequest): Promise<Dict
   }
 }
 
-export async function update (dictionaryData: AddDefinitionRequest): Promise<DictionaryModel> {
-  const newTerm = await Term.create({ title: dictionaryData.term })
-  const newAnswer = await Answer.create({ answer: dictionaryData.answer, termId: newTerm._doc._id })
+export async function update (dictionaryData: UpdateDefinitionRequest): Promise<DictionaryModel> {
+  const termToUpdate = await Term.findOneAndUpdate({ _id: dictionaryData.termId }, { title: dictionaryData.term }, {
+    new: true
+  })
+
+  const updatedAnswer = await Answer.findOneAndUpdate({ termId: dictionaryData.termId, userId: null }, { answer: dictionaryData.answer }, {
+    new: true
+  })
+
+  if (!termToUpdate) {
+    throw new Error('')
+  }
+
+  if (!updatedAnswer) {
+    throw new Error('')
+  }
 
   return {
-    term: newTerm._doc,
-    answers: [newAnswer._doc]
+    term: termToUpdate._doc,
+    answers: [updatedAnswer._doc]
   }
 }
