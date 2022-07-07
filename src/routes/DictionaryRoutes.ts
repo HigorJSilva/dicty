@@ -6,8 +6,8 @@ import { store, list, update } from '../controllers/DictionaryController'
 
 const router = express.Router()
 
-router.get('/list', authorize(), list)
-router.post('/store', authorize('admin'), AddDefinitionRequest, validateRequest, store)
+router.get('/', authorize(), list)
+router.post('/', authorize('admin'), AddDefinitionRequest, validateRequest, store)
 router.put('/:termId', authorize('admin'), UpdateDefinitionRequest, validateRequest, update)
 
 export { router as dictionaryRoutes }
