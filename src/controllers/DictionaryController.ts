@@ -3,6 +3,7 @@ import { getFilteredRequest } from '@/middlewares/helpers/utils'
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
+import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
 import { NextFunction, Request, Response } from 'express'
 import * as DictionaryService from '../services/DictionaryService'
 
@@ -45,5 +46,22 @@ export async function remove (req: Request, res: Response, next: NextFunction): 
     return res.status(200).json(ApiResponse(true, null, ret, null))
   } catch (error) {
     return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+  }
+}
+
+export async function userAnswer (req: Request, res: Response): Promise<Response | null> {
+  const filteredRequest: UserAnswerRequest = getFilteredRequest(req) as UserAnswerRequest
+  try {
+    const userAnswer = await DictionaryService.userAnswer(filteredRequest)
+
+    if (userAnswer instanceof Error) {
+      return res.status(422).json(ApiResponse(false, userAnswer.message, null, null))
+    }
+
+    return res.status(200).json(ApiResponse(true, null, userAnswer, null))
+  } catch (error) {
+    const err = error as Error
+
+    return res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? ['']))
   }
 }

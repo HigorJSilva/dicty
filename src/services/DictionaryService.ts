@@ -1,6 +1,7 @@
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
+import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
 
 export async function list (): Promise<DictionaryModel[]> {
@@ -72,4 +73,14 @@ export async function remove (dictionaryData: DeleteDefinitionRequest): Promise<
   await Answer.deleteMany({ termId: dictionaryData.termId })
   await Term.findOneAndDelete(dictionaryData.termId)
   return true
+}
+
+export async function userAnswer (dictionaryData: UserAnswerRequest): Promise<DictionaryModel> {
+  const term = await Term.findOne({ _id: dictionaryData.termId }) as { _id: string, title: string }
+  const newAnswer = await Answer.create({ answer: dictionaryData.answer, termId: dictionaryData.termId, userId: dictionaryData.userId })
+
+  return {
+    term,
+    answers: [newAnswer._doc]
+  }
 }
