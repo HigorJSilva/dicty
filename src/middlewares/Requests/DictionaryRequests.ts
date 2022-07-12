@@ -30,3 +30,14 @@ export const DeleteDefinitionRequest = [
     .isMongoId()
     .custom(async (value: string) => await exists(value, Term, '_id'))
 ]
+
+export const UserAnswerRequest = [
+  ...AuthenticatedUserRequest,
+  param('termId')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isMongoId()
+    .custom(async (value: string) => await exists(value, Term, '_id')),
+  body('answer')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isLength({ min: 5 }).withMessage(fieldSizeMessage(5))
+]
