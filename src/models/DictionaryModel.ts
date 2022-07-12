@@ -10,6 +10,7 @@ export interface AnswerModel extends DocumentResult<AnswerModel>{
   _id: string
   answer: string
   userid?: string
+  isApproved?: boolean
 }
 
 export interface DictionaryModel {
@@ -36,6 +37,13 @@ const AnswerSchema = new mongoose.Schema({
   termId: {
     type: Types.ObjectId,
     required: true
+  },
+  userId: {
+    type: Types.ObjectId
+  },
+  isApproved: {
+    type: Boolean,
+    default: false
   }
 })
 export const Answer = mongoose.model<AnswerModel>('Answer', AnswerSchema)
