@@ -4,6 +4,7 @@ import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDef
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
+import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionRequest'
 import { NextFunction, Request, Response } from 'express'
 import * as DictionaryService from '../services/DictionaryService'
 
@@ -63,5 +64,16 @@ export async function userAnswer (req: Request, res: Response): Promise<Response
     const err = error as Error
 
     return res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? ['']))
+  }
+}
+
+export async function userDefiniton (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
+  const filteredRequest: UserDefinitonRequest = getFilteredRequest(req) as UserDefinitonRequest
+  try {
+    const dictionaryTerm = await DictionaryService.userDefiniton(filteredRequest)
+
+    return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
+  } catch (error) {
+    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
   }
 }
