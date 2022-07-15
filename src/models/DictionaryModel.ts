@@ -25,6 +25,12 @@ const TermSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true
+  },
+  userId: {
+    type: Types.ObjectId
+  },
+  isApproved: {
+    type: Boolean
   }
 })
 export const Term = mongoose.model<TermModel>('Term', TermSchema)
@@ -42,8 +48,7 @@ const AnswerSchema = new mongoose.Schema({
     type: Types.ObjectId
   },
   isApproved: {
-    type: Boolean,
-    default: false
+    type: Boolean
   }
 })
 export const Answer = mongoose.model<AnswerModel>('Answer', AnswerSchema)
