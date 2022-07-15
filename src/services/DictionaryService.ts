@@ -9,7 +9,7 @@ export async function list (): Promise<DictionaryModel[]> {
     {
       $group: {
         _id: '$termId',
-        anwers: {
+        answers: {
           $push: '$$ROOT'
         }
       }
@@ -26,11 +26,23 @@ export async function list (): Promise<DictionaryModel[]> {
         title: {
           $first: '$result.title'
         },
-        answers: '$anwers'
+        answers: {
+          $filter: {
+            input: '$answers',
+            as: 'item',
+            cond: {
+              $ne: [
+                '$$item.isApproved',
+                false
+              ]
+            }
+          }
+        }
       }
     }, {
       $unset: [
-        'answers.termId', 'answers.__v'
+        'answers.termId',
+        'answers.__v'
       ]
     }
   ])
