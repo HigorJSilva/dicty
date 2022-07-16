@@ -6,30 +6,30 @@ import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDe
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
 
 export async function list (): Promise<DictionaryModel[]> {
-  return await Answer.aggregate([
+  return await Term.aggregate([
     {
-      $group: {
-        _id: '$termId',
-        answers: {
-          $push: '$$ROOT'
-        }
+      $match: {
+        $or: [{
+          isApproved: true
+        },
+        {
+          isApproved: null
+        }]
       }
     }, {
       $lookup: {
-        from: 'terms',
-        foreignField: '_id',
+        from: 'answers',
+        foreignField: 'termId',
         localField: '_id',
         as: 'result'
       }
     }, {
       $project: {
         _id: '$_id',
-        title: {
-          $first: '$result.title'
-        },
+        title: '$title',
         answers: {
           $filter: {
-            input: '$answers',
+            input: '$result',
             as: 'item',
             cond: {
               $ne: [
@@ -43,7 +43,8 @@ export async function list (): Promise<DictionaryModel[]> {
     }, {
       $unset: [
         'answers.termId',
-        'answers.__v'
+        'answers.__v',
+        'answers.isApproved'
       ]
     }
   ])
