@@ -1,8 +1,8 @@
 import { authorize } from '@/middlewares/Auth'
-import { AddDefinitionRequest, DeleteDefinitionRequest, UpdateDefinitionRequest, UserAnswerRequest } from '@/middlewares/Requests/DictionaryRequests'
+import { AddDefinitionRequest, ApproveUserTermRequest, DeleteDefinitionRequest, UpdateDefinitionRequest, UserAnswerRequest } from '@/middlewares/Requests/DictionaryRequests'
 import { validateRequest } from '@/middlewares/ValidateRequest'
 import express from 'express'
-import { store, list, update, remove, userAnswer, userDefiniton } from '../controllers/DictionaryController'
+import { store, list, update, remove, userAnswer, userDefiniton, userDefinitonApproval } from '../controllers/DictionaryController'
 
 const router = express.Router()
 
@@ -13,5 +13,6 @@ router.delete('/:termId', authorize('admin'), DeleteDefinitionRequest, validateR
 
 router.post('/user-answer/:termId', authorize(), UserAnswerRequest, validateRequest, userAnswer)
 router.post('/user-definition/', authorize(), AddDefinitionRequest, validateRequest, userDefiniton)
+router.post('/approve-term/:termId', authorize('admin'), ApproveUserTermRequest, validateRequest, userDefinitonApproval)
 
 export { router as dictionaryRoutes }

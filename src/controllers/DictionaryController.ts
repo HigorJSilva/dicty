@@ -4,6 +4,7 @@ import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDef
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
+import { UserDefinitonApprovalRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionApprovalRequest'
 import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionRequest'
 import { NextFunction, Request, Response } from 'express'
 import * as DictionaryService from '../services/DictionaryService'
@@ -74,6 +75,22 @@ export async function userDefiniton (req: Request, res: Response, next: NextFunc
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
+    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+  }
+}
+
+export async function userDefinitonApproval (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
+  const filteredRequest: UserDefinitonApprovalRequest = getFilteredRequest(req) as UserDefinitonApprovalRequest
+  try {
+    await DictionaryService.userDefinitonApproval(filteredRequest)
+
+    return res.status(204).json(ApiResponse(true, null, null, null))
+  } catch (error) {
+    const err = error as Error
+
+    if (err.name === 'ValidationError') {
+      return res.status(422).json(ApiResponse(false, null, null, [err.message] ?? ['']))
+    }
     return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
   }
 }

@@ -1,9 +1,12 @@
+import { resourceNotFound } from '@/helpers/ErrorMessages'
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
+import { UserDefinitonApprovalRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionApprovalRequest'
 import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
+import { ObjectId } from 'mongoose'
 
 export async function list (): Promise<DictionaryModel[]> {
   return await Term.aggregate([
@@ -117,4 +120,48 @@ export async function userDefiniton (dictionaryData: UserDefinitonRequest): Prom
     term: newTerm._doc,
     answers: [newAnswer._doc]
   }
+}
+
+export async function userDefinitonApproval (approvalData: UserDefinitonApprovalRequest): Promise<void> {
+  if (approvalData.approval) {
+    await approveUserDefinition(approvalData.termId as unknown as ObjectId)
+  } else {
+    await declineUserDefinition(approvalData.termId as unknown as ObjectId)
+  }
+}
+
+async function approveUserDefinition (termId: ObjectId): Promise<void> {
+  await Term.findByIdAndUpdate({
+    _id: termId
+  }, {
+    isApproved: true
+  })
+
+  const answer = await Answer.findOne({ termId: termId }, '_id')
+  if (!answer) {
+    throw resourceNotFound('Answer')
+  }
+  await approveUserAnswer(answer._id as unknown as ObjectId)
+}
+
+export async function approveUserAnswer (answerId: ObjectId): Promise<void> {
+  await Answer.findByIdAndUpdate({
+    _id: answerId
+  }, {
+    isApproved: true
+  })
+}
+
+async function declineUserDefinition (termId: ObjectId): Promise<void> {
+  await Term.findByIdAndDelete(termId)
+  const answer = await Answer.findOne({ termId: termId }, '_id')
+
+  if (!answer) {
+    throw resourceNotFound('Answer')
+  }
+  await declineUserAnswer(answer._id as unknown as ObjectId)
+}
+
+export async function declineUserAnswer (answerId: ObjectId): Promise<void> {
+  await Answer.findByIdAndDelete(answerId)
 }
