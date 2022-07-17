@@ -41,3 +41,14 @@ export const UserAnswerRequest = [
     .notEmpty().withMessage(requiredMessage).bail()
     .isLength({ min: 5 }).withMessage(fieldSizeMessage(5))
 ]
+
+export const ApproveUserTermRequest = [
+  ...AuthenticatedUserRequest,
+  param('termId')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isMongoId()
+    .custom(async (value: string) => await exists(value, Term, '_id')),
+  body('approval')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isBoolean()
+]
