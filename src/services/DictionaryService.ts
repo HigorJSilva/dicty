@@ -19,14 +19,16 @@ export async function list (): Promise<DictionaryModel[]> {
           isApproved: null
         }]
       }
-    }, {
+    },
+    {
       $lookup: {
         from: 'answers',
         foreignField: 'termId',
         localField: '_id',
         as: 'result'
       }
-    }, {
+    },
+    {
       $project: {
         _id: '$_id',
         title: '$title',
@@ -43,9 +45,58 @@ export async function list (): Promise<DictionaryModel[]> {
           }
         }
       }
-    }, {
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'answers.userId',
+        foreignField: '_id',
+        as: 'result'
+      }
+    },
+    {
+      $project: {
+        _id: '$_id',
+        title: '$title',
+        answers: {
+          $map: {
+            input: '$answers',
+            as: 'a',
+            in: {
+              $mergeObjects: [
+                '$$a',
+                {
+                  $arrayElemAt: [{
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$result',
+                          cond: {
+                            $eq: [
+                              '$$a.userId',
+                              '$$this._id'
+                            ]
+                          }
+                        }
+                      },
+                      in: {
+                        username: '$$this.username'
+                      }
+                    }
+                  },
+                  0
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
       $unset: [
         'answers.termId',
+        'answers.userId',
         'answers.__v',
         'answers.isApproved'
       ]
