@@ -7,7 +7,7 @@ import { UserDefinitonApprovalRequest } from '@/middlewares/interfaces/dictionar
 import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
 import { Downvote, Upvote } from '@/models/UpVoteModel'
-import { ObjectId } from 'mongoose'
+import mongoose, { ObjectId } from 'mongoose'
 
 export async function list (): Promise<DictionaryModel[]> {
   return await Term.aggregate([
@@ -165,6 +165,80 @@ export async function search (search: string): Promise<any[]> {
             }
           }
         ]
+      }
+    }, {
+      $lookup: {
+        from: 'answers',
+        localField: '_id',
+        foreignField: 'termId',
+        as: 'result'
+      }
+    }, {
+      $project: {
+        _id: '$_id',
+        title: '$title',
+        userId: '$userId',
+        officialAnswer: {
+          $first: '$result.answer'
+        },
+        answers: {
+          $filter: {
+            input: '$result',
+            as: 'answer',
+            cond: {
+              $or: [
+                {
+                  $eq: [
+                    '$$answer.isApproved',
+                    true
+                  ]
+                },
+                {
+                  $ifNull: [
+                    '$$answer.isApproved',
+                    true
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }, {
+      $unwind: {
+        path: '$answers'
+      }
+    }, {
+      $sort: {
+        'answers.voteCount': -1
+      }
+    }, {
+      $group: {
+        _id: {
+          _id: '$_id',
+          title: '$title',
+          officialAnswer: '$officialAnswer'
+        },
+        answers: {
+          $push: '$answers'
+        }
+      }
+    }, {
+      $project: {
+        _id: '$_id._id',
+        title: '$_id.title',
+        officialAnswer: '$_id.officialAnswer',
+        answers: '$answers'
+      }
+    }]
+  )
+}
+
+export async function find (termId: string): Promise<any[]> {
+  return await Term.aggregate(
+    [{
+      $match: {
+        _id: new mongoose.Types.ObjectId(termId)
       }
     }, {
       $lookup: {
