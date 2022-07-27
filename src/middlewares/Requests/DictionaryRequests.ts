@@ -31,6 +31,19 @@ export const DeleteDefinitionRequest = [
     .custom(async (value: string) => await exists(value, Term, '_id'))
 ]
 
+export const SearchDefinitionRequest = [
+  body('search')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isLength({ min: 3 }).withMessage(fieldSizeMessage(2))
+]
+
+export const FindDefinitionRequest = [
+  param('termId')
+    .notEmpty().withMessage(requiredMessage).bail()
+    .isLength({ min: 3 }).withMessage(fieldSizeMessage(2))
+    .isMongoId()
+]
+
 export const UserAnswerRequest = [
   ...AuthenticatedUserRequest,
   param('termId')
