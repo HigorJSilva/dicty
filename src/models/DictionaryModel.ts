@@ -47,6 +47,12 @@ const AnswerSchema = new mongoose.Schema({
   userId: {
     type: Types.ObjectId
   },
+  voteCount: {
+    type: Number
+  },
+  votes: [{
+    user: { type: Types.ObjectId }
+  }],
   isApproved: {
     type: Boolean
   }
