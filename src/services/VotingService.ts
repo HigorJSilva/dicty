@@ -46,7 +46,6 @@ export async function upvote (votingData: VoteRequest): Promise<boolean> {
 
     const downvote = await Downvote.findOne({ answerId: votingData.answerId })
 
-    console.log('TURBO >> file: VotingService.ts >> line 51 >> downvote?.votes.filter((user: ObjectId) => votingData.userId).length', downvote?.votes.filter((user: ObjectId) => votingData.userId).length)
     // @ts-expect-error
     if (downvote?.votes.filter((user: ObjectId) => votingData.userId).length > 0) {
       await Downvote.updateOne({

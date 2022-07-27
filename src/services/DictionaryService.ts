@@ -145,6 +145,95 @@ export async function remove (dictionaryData: DeleteDefinitionRequest): Promise<
   return true
 }
 
+export async function search (search: string): Promise<any[]> {
+  return await Term.aggregate(
+    [{
+      $match: {
+        $or: [
+          {
+            isApproved: true
+          },
+          {
+            isApproved: null
+          }
+        ],
+        $and: [
+          {
+            title: {
+              $regex: 'term',
+              $options: 'i'
+            }
+          }
+        ]
+      }
+    }, {
+      $lookup: {
+        from: 'answers',
+        localField: '_id',
+        foreignField: 'termId',
+        as: 'result'
+      }
+    }, {
+      $project: {
+        _id: '$_id',
+        title: '$title',
+        userId: '$userId',
+        officialAnswer: {
+          $first: '$result.answer'
+        },
+        answers: {
+          $filter: {
+            input: '$result',
+            as: 'answer',
+            cond: {
+              $or: [
+                {
+                  $eq: [
+                    '$$answer.isApproved',
+                    true
+                  ]
+                },
+                {
+                  $ifNull: [
+                    '$$answer.isApproved',
+                    true
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }, {
+      $unwind: {
+        path: '$answers'
+      }
+    }, {
+      $sort: {
+        'answers.voteCount': -1
+      }
+    }, {
+      $group: {
+        _id: {
+          _id: '$_id',
+          title: '$title',
+          officialAnswer: '$officialAnswer'
+        },
+        answers: {
+          $push: '$answers'
+        }
+      }
+    }, {
+      $project: {
+        _id: '$_id._id',
+        title: '$_id.title',
+        officialAnswer: '$_id.officialAnswer',
+        answers: '$answers'
+      }
+    }]
+  )
+}
+
 export async function userAnswer (dictionaryData: UserAnswerRequest): Promise<DictionaryModel> {
   const term = await Term.findOne({ _id: dictionaryData.termId }) as { _id: string, title: string }
   const newAnswer = await Answer.create({ answer: dictionaryData.answer, termId: dictionaryData.termId, userId: dictionaryData.userId })

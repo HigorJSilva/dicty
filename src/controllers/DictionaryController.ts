@@ -2,6 +2,7 @@ import { ApiResponse } from '@/middlewares/helpers/HttpResponse'
 import { getFilteredRequest } from '@/middlewares/helpers/utils'
 import { AddDefinitionRequest } from '@/middlewares/interfaces/dictionary/AddDefinitionRequest'
 import { DeleteDefinitionRequest } from '@/middlewares/interfaces/dictionary/DeleteDefinitionRequest'
+import { SearchDefinitionRequest } from '@/middlewares/interfaces/dictionary/SearchDefinitionRequest'
 import { UpdateDefinitionRequest } from '@/middlewares/interfaces/dictionary/UpdateDefinitionRequest'
 import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswerRequest'
 import { UserDefinitonApprovalRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionApprovalRequest'
@@ -23,6 +24,28 @@ export async function store (req: Request, res: Response, next: NextFunction): P
 export async function list (req: Request, res: Response, next: NextFunction): Promise<Response> {
   try {
     const dictionaryTerm = await DictionaryService.list()
+
+    return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
+  } catch (error) {
+    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+  }
+}
+
+export async function search (req: Request, res: Response, next: NextFunction): Promise<Response> {
+  const filteredRequest: SearchDefinitionRequest = getFilteredRequest(req) as SearchDefinitionRequest
+  try {
+    const dictionaryTerm = await DictionaryService.search(filteredRequest.search)
+
+    return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
+  } catch (error) {
+    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+  }
+}
+
+export async function find (req: Request, res: Response, next: NextFunction): Promise<Response> {
+  const filteredRequest = getFilteredRequest(req)
+  try {
+    const dictionaryTerm = await DictionaryService.find(filteredRequest.termId)
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
