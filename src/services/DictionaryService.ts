@@ -6,6 +6,7 @@ import { UserAnswerRequest } from '@/middlewares/interfaces/dictionary/UserAnswe
 import { UserDefinitonApprovalRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionApprovalRequest'
 import { UserDefinitonRequest } from '@/middlewares/interfaces/dictionary/UserDefinitionRequest'
 import { Answer, DictionaryModel, Term } from '@/models/DictionaryModel'
+import { Downvote, Upvote } from '@/models/UpVoteModel'
 import { ObjectId } from 'mongoose'
 
 export async function list (): Promise<DictionaryModel[]> {
@@ -107,6 +108,7 @@ export async function list (): Promise<DictionaryModel[]> {
 export async function store (dictionaryData: AddDefinitionRequest): Promise<DictionaryModel> {
   const newTerm = await Term.create({ title: dictionaryData.term })
   const newAnswer = await Answer.create({ answer: dictionaryData.answer, termId: newTerm._doc._id })
+  await createUpvoteDownvoteSchema(newAnswer._doc._id as unknown as ObjectId)
 
   return {
     term: newTerm._doc,
@@ -201,6 +203,7 @@ export async function approveUserAnswer (answerId: ObjectId): Promise<void> {
   }, {
     isApproved: true
   })
+  await createUpvoteDownvoteSchema(answerId)
 }
 
 async function declineUserDefinition (termId: ObjectId): Promise<void> {
@@ -215,4 +218,15 @@ async function declineUserDefinition (termId: ObjectId): Promise<void> {
 
 export async function declineUserAnswer (answerId: ObjectId): Promise<void> {
   await Answer.findByIdAndDelete(answerId)
+}
+
+async function createUpvoteDownvoteSchema (answerId: ObjectId): Promise<void> {
+  const answer = await Answer.findById(answerId)
+
+  if (!answer) {
+    throw resourceNotFound('Answer')
+  }
+
+  await Upvote.create({ answerId })
+  await Downvote.create({ answerId })
 }
