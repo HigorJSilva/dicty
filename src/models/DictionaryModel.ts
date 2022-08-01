@@ -48,7 +48,8 @@ const AnswerSchema = new mongoose.Schema({
     type: Types.ObjectId
   },
   voteCount: {
-    type: Number
+    type: Number,
+    default: 0
   },
   votes: [{
     user: { type: Types.ObjectId }
