@@ -10,64 +10,67 @@ import { Downvote, Upvote } from '@/models/UpVoteModel'
 import mongoose, { ObjectId } from 'mongoose'
 
 export async function list (): Promise<DictionaryModel[]> {
-  return await Term.aggregate([
-    {
-      $match: {
-        $or: [{
+  return await Term.aggregate([{
+    $match: {
+      $or: [
+        {
           isApproved: true
         },
         {
           isApproved: null
-        }]
-      }
-    },
-    {
-      $lookup: {
-        from: 'answers',
-        foreignField: 'termId',
-        localField: '_id',
-        as: 'result'
-      }
-    },
-    {
-      $project: {
-        _id: '$_id',
-        title: '$title',
-        answers: {
-          $filter: {
-            input: '$result',
-            as: 'item',
-            cond: {
-              $ne: [
-                '$$item.isApproved',
-                false
-              ]
-            }
+        }
+      ]
+    }
+  }, {
+    $lookup: {
+      from: 'answers',
+      foreignField: 'termId',
+      localField: '_id',
+      as: 'result'
+    }
+  }, {
+    $project: {
+      _id: '$_id',
+      title: '$title',
+      userId: '$userId',
+      officialAnswer: {
+        $first: '$result.answer'
+      },
+      answers: {
+        $filter: {
+          input: '$result',
+          as: 'item',
+          cond: {
+            $ne: [
+              '$$item.isApproved',
+              false
+            ]
           }
         }
       }
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'answers.userId',
-        foreignField: '_id',
-        as: 'result'
-      }
-    },
-    {
-      $project: {
-        _id: '$_id',
-        title: '$title',
-        answers: {
-          $map: {
-            input: '$answers',
-            as: 'a',
-            in: {
-              $mergeObjects: [
-                '$$a',
-                {
-                  $arrayElemAt: [{
+    }
+  }, {
+    $lookup: {
+      from: 'users',
+      localField: 'answers.userId',
+      foreignField: '_id',
+      as: 'result'
+    }
+  }, {
+    $project: {
+      _id: '$_id',
+      title: '$title',
+      officialAnswer: '$officialAnswer',
+      answers: {
+        $map: {
+          input: '$answers',
+          as: 'a',
+          in: {
+            $mergeObjects: [
+              '$$a',
+              {
+                $arrayElemAt: [
+                  {
                     $map: {
                       input: {
                         $filter: {
@@ -86,23 +89,40 @@ export async function list (): Promise<DictionaryModel[]> {
                     }
                   },
                   0
-                  ]
-                }
-              ]
-            }
+                ]
+              }
+            ]
           }
         }
       }
-    },
-    {
-      $unset: [
-        'answers.termId',
-        'answers.userId',
-        'answers.__v',
-        'answers.isApproved'
-      ]
     }
-  ])
+  }, {
+    $unwind: {
+      path: '$answers'
+    }
+  }, {
+    $sort: {
+      'answers.voteCount': -1
+    }
+  }, {
+    $group: {
+      _id: {
+        _id: '$_id',
+        title: '$title',
+        officialAnswer: '$officialAnswer'
+      },
+      answers: {
+        $push: '$answers'
+      }
+    }
+  }, {
+    $project: {
+      _id: '$_id._id',
+      title: '$_id.title',
+      officialAnswer: '$_id.officialAnswer',
+      answers: '$answers'
+    }
+  }])
 }
 
 export async function store (dictionaryData: AddDefinitionRequest): Promise<DictionaryModel> {
@@ -146,92 +166,127 @@ export async function remove (dictionaryData: DeleteDefinitionRequest): Promise<
 }
 
 export async function search (search: string): Promise<any[]> {
-  return await Term.aggregate(
-    [{
-      $match: {
-        $or: [
-          {
-            isApproved: true
-          },
-          {
-            isApproved: null
+  return await Term.aggregate([{
+    $match: {
+      $or: [
+        {
+          isApproved: true
+        },
+        {
+          isApproved: null
+        }
+      ],
+      $and: [
+        {
+          title: {
+            $regex: search,
+            $options: 'i'
           }
-        ],
-        $and: [
-          {
-            title: {
-              $regex: 'term',
-              $options: 'i'
-            }
+        }
+      ]
+    }
+  }, {
+    $lookup: {
+      from: 'answers',
+      foreignField: 'termId',
+      localField: '_id',
+      as: 'result'
+    }
+  }, {
+    $project: {
+      _id: '$_id',
+      title: '$title',
+      userId: '$userId',
+      officialAnswer: {
+        $first: '$result.answer'
+      },
+      answers: {
+        $filter: {
+          input: '$result',
+          as: 'item',
+          cond: {
+            $ne: [
+              '$$item.isApproved',
+              false
+            ]
           }
-        ]
+        }
       }
-    }, {
-      $lookup: {
-        from: 'answers',
-        localField: '_id',
-        foreignField: 'termId',
-        as: 'result'
+    }
+  }, {
+    $lookup: {
+      from: 'users',
+      localField: 'answers.userId',
+      foreignField: '_id',
+      as: 'result'
+    }
+  }, {
+    $project: {
+      _id: '$_id',
+      title: '$title',
+      officialAnswer: '$officialAnswer',
+      answers: {
+        $map: {
+          input: '$answers',
+          as: 'a',
+          in: {
+            $mergeObjects: [
+              '$$a',
+              {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$result',
+                          cond: {
+                            $eq: [
+                              '$$a.userId',
+                              '$$this._id'
+                            ]
+                          }
+                        }
+                      },
+                      in: {
+                        username: '$$this.username'
+                      }
+                    }
+                  },
+                  0
+                ]
+              }
+            ]
+          }
+        }
       }
-    }, {
-      $project: {
+    }
+  }, {
+    $unwind: {
+      path: '$answers'
+    }
+  }, {
+    $sort: {
+      'answers.voteCount': -1
+    }
+  }, {
+    $group: {
+      _id: {
         _id: '$_id',
         title: '$title',
-        userId: '$userId',
-        officialAnswer: {
-          $first: '$result.answer'
-        },
-        answers: {
-          $filter: {
-            input: '$result',
-            as: 'answer',
-            cond: {
-              $or: [
-                {
-                  $eq: [
-                    '$$answer.isApproved',
-                    true
-                  ]
-                },
-                {
-                  $ifNull: [
-                    '$$answer.isApproved',
-                    true
-                  ]
-                }
-              ]
-            }
-          }
-        }
+        officialAnswer: '$officialAnswer'
+      },
+      answers: {
+        $push: '$answers'
       }
-    }, {
-      $unwind: {
-        path: '$answers'
-      }
-    }, {
-      $sort: {
-        'answers.voteCount': -1
-      }
-    }, {
-      $group: {
-        _id: {
-          _id: '$_id',
-          title: '$title',
-          officialAnswer: '$officialAnswer'
-        },
-        answers: {
-          $push: '$answers'
-        }
-      }
-    }, {
-      $project: {
-        _id: '$_id._id',
-        title: '$_id.title',
-        officialAnswer: '$_id.officialAnswer',
-        answers: '$answers'
-      }
-    }]
-  )
+    }
+  }, {
+    $project: {
+      _id: '$_id._id',
+      title: '$_id.title',
+      officialAnswer: '$_id.officialAnswer',
+      answers: '$answers'
+    }
+  }])
 }
 
 export async function find (termId: string): Promise<any[]> {
