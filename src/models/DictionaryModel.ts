@@ -1,4 +1,4 @@
-import mongoose, { Types } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import { DocumentResult } from './MongooseDocumentModel'
 
 export interface TermModel extends DocumentResult<TermModel> {
@@ -27,7 +27,7 @@ const TermSchema = new mongoose.Schema({
     required: true
   },
   userId: {
-    type: Types.ObjectId
+    type: Schema.Types.ObjectId
   },
   isApproved: {
     type: Boolean
@@ -41,18 +41,18 @@ const AnswerSchema = new mongoose.Schema({
     required: true
   },
   termId: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     required: true
   },
   userId: {
-    type: Types.ObjectId
+    type: Schema.Types.ObjectId
   },
   voteCount: {
     type: Number,
     default: 0
   },
   votes: [{
-    user: { type: Types.ObjectId }
+    user: { type: Schema.Types.ObjectId }
   }],
   isApproved: {
     type: Boolean

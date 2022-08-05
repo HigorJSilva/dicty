@@ -36,7 +36,6 @@ export async function upvote (votingData: VoteRequest): Promise<boolean> {
     },
     {
       $push: {
-        // @ts-expect-error
         votes: { userId: votingData.userId }
       }
     },
@@ -109,7 +108,6 @@ export async function downvote (votingData: VoteRequest): Promise<boolean> {
     },
     {
       $push: {
-        // @ts-expect-error
         votes: { userId: votingData.userId }
       }
     },
