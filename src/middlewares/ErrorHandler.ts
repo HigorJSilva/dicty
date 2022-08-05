@@ -1,5 +1,6 @@
 import makeUnauthenticatedErrorResponse from '@/helpers/UnauthenticatedError'
 import makeUnauthorizedErrorResponse from '@/helpers/UnauthorizedError'
+import makeValidationErrorResponse, { ValidationError } from '@/helpers/ValidationError'
 import { ApiResponse } from '@/middlewares/helpers/HttpResponse'
 import { NextFunction, Request, Response } from 'express'
 
@@ -13,14 +14,7 @@ export function errorHandler (error: Error, _request: Request, response: Respons
       return makeUnauthenticatedErrorResponse(response)
 
     case 'ValidationError':
-      return response.status(422).json(
-        ApiResponse(
-          false,
-          error.message,
-          null,
-          null
-        )
-      )
+      return makeValidationErrorResponse(response, error as ValidationError)
 
     default:
       return response.status(500).json(
