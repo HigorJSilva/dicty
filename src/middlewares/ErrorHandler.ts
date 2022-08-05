@@ -16,7 +16,7 @@ export function errorHandler (error: Error, _request: Request, response: Respons
       return response.status(422).json(
         ApiResponse(
           false,
-          null,
+          error.message,
           null,
           null
         )

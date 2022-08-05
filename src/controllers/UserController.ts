@@ -16,13 +16,9 @@ export async function register (req: Request, res: Response, next: NextFunction)
 
     return res.status(422).json(ApiResponse(false, null, null, userRegister))
   } catch (error) {
-    const err = error as Error
+    next(error)
 
-    if (err.name === 'ValidationError') {
-      return res.status(422).json(ApiResponse(false, null, null, [err.message] ?? ['']))
-    }
-
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? ['']))
+    return null
   }
 }
 
@@ -37,8 +33,8 @@ export async function auth (req: Request, res: Response, next: NextFunction): Pr
 
     return res.status(200).json(ApiResponse(true, null, userLogin, null))
   } catch (error) {
-    const err = error as Error
+    next(error)
 
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? ['']))
+    return null
   }
 }
