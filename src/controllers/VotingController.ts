@@ -11,17 +11,21 @@ export async function upvote (req: Request, res: Response, next: NextFunction): 
 
     return res.status(204).json(ApiResponse(true, null, null, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
-export async function downvote (req: Request, res: Response, next: NextFunction): Promise<Response> {
+export async function downvote (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
   const filteredRequest: VoteRequest = getFilteredRequest(req) as VoteRequest
   try {
     await VotingService.downvote(filteredRequest)
 
     return res.status(204).json(ApiResponse(true, null, null, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }

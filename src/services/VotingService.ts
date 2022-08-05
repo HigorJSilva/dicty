@@ -1,14 +1,13 @@
 import { VoteRequest } from '@/middlewares/interfaces/dictionary/VoteRequest'
 import { Answer } from '@/models/DictionaryModel'
-import { Upvote, Downvote } from '@/models/UpVoteModel'
+import { Upvote, Downvote, voteModel } from '@/models/UpVoteModel'
 import { ObjectId } from 'mongoose'
 
 export async function upvote (votingData: VoteRequest): Promise<boolean> {
-  let oneVote = await Upvote.findOne({ answerId: votingData.answerId })
+  let oneVote: voteModel | null = await Upvote.findOne({ answerId: votingData.answerId })
   const options = { upsert: true, new: true, setDefaultsOnInsert: true }
 
   if (oneVote) {
-    // @ts-expect-error
     oneVote = oneVote._doc
   }
 
@@ -44,7 +43,7 @@ export async function upvote (votingData: VoteRequest): Promise<boolean> {
     { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false }
     )
 
-    const downvote = await Downvote.findOne({ answerId: votingData.answerId })
+    const downvote: voteModel | null = await Downvote.findOne({ answerId: votingData.answerId })
 
     // @ts-expect-error
     if (downvote?.votes.filter((user: ObjectId) => votingData.userId).length > 0) {
@@ -79,11 +78,10 @@ export async function upvote (votingData: VoteRequest): Promise<boolean> {
 }
 
 export async function downvote (votingData: VoteRequest): Promise<boolean> {
-  let oneVote = await Downvote.findOne({ answerId: votingData.answerId })
+  let oneVote: voteModel | null = await Downvote.findOne({ answerId: votingData.answerId })
   const options = { upsert: true, new: true, setDefaultsOnInsert: true }
 
   if (oneVote) {
-    // @ts-expect-error
     oneVote = oneVote._doc
   }
 
@@ -117,7 +115,7 @@ export async function downvote (votingData: VoteRequest): Promise<boolean> {
     },
     { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false }
     )
-    const upvote = await Upvote.findOne({ answerId: votingData.answerId })
+    const upvote: voteModel | null = await Upvote.findOne({ answerId: votingData.answerId })
 
     // @ts-expect-error
     if (upvote?.votes.filter(() => votingData.userId).length > 0) {
