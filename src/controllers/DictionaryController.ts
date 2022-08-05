@@ -17,39 +17,47 @@ export async function store (req: Request, res: Response, next: NextFunction): P
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
-export async function list (req: Request, res: Response, next: NextFunction): Promise<Response> {
+export async function list (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
   try {
     const dictionaryTerm = await DictionaryService.list()
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
-export async function search (req: Request, res: Response, next: NextFunction): Promise<Response> {
+export async function search (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
   const filteredRequest: SearchDefinitionRequest = getFilteredRequest(req) as SearchDefinitionRequest
   try {
     const dictionaryTerm = await DictionaryService.search(filteredRequest.search)
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
-export async function find (req: Request, res: Response, next: NextFunction): Promise<Response> {
+export async function find (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
   const filteredRequest = getFilteredRequest(req)
   try {
     const dictionaryTerm = await DictionaryService.find(filteredRequest.termId)
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
@@ -60,7 +68,9 @@ export async function update (req: Request, res: Response, next: NextFunction): 
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
@@ -70,11 +80,13 @@ export async function remove (req: Request, res: Response, next: NextFunction): 
     const ret = await DictionaryService.remove(filteredRequest)
     return res.status(200).json(ApiResponse(true, null, ret, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
-export async function userAnswer (req: Request, res: Response): Promise<Response | null> {
+export async function userAnswer (req: Request, res: Response, next: NextFunction): Promise<Response | null> {
   const filteredRequest: UserAnswerRequest = getFilteredRequest(req) as UserAnswerRequest
   try {
     const userAnswer = await DictionaryService.userAnswer(filteredRequest)
@@ -85,9 +97,9 @@ export async function userAnswer (req: Request, res: Response): Promise<Response
 
     return res.status(200).json(ApiResponse(true, null, userAnswer, null))
   } catch (error) {
-    const err = error as Error
+    next(error)
 
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [err.stack] ?? ['']))
+    return null
   }
 }
 
@@ -98,7 +110,9 @@ export async function userDefiniton (req: Request, res: Response, next: NextFunc
 
     return res.status(200).json(ApiResponse(true, null, dictionaryTerm, null))
   } catch (error) {
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    next(error)
+
+    return null
   }
 }
 
@@ -109,11 +123,8 @@ export async function userDefinitonApproval (req: Request, res: Response, next: 
 
     return res.status(204).json(ApiResponse(true, null, null, null))
   } catch (error) {
-    const err = error as Error
+    next(error)
 
-    if (err.name === 'ValidationError') {
-      return res.status(422).json(ApiResponse(false, null, null, [err.message] ?? ['']))
-    }
-    return res.status(500).json(ApiResponse(false, 'InternalError', null, [(error as Error).stack] ?? ['']))
+    return null
   }
 }
