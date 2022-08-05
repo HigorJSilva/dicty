@@ -1,9 +1,9 @@
 import * as jwt from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
-import errorHandler from '../helpers/ErrorHandler'
 import env from '@/config/env'
 import User, { UserModel } from '@/models/UserModel'
 import { JwtInterface } from './interfaces/user/jwtInterface'
+import { UnauthorizedError } from '@/helpers/UnauthorizedError'
 
 export function authorize (roles: string[] | string = []): any {
   if (typeof roles === 'string') {
@@ -15,19 +15,22 @@ export function authorize (roles: string[] | string = []): any {
       const token = req.headers.authorization as string
 
       if (!token) {
-        return errorHandler({ name: 'UnauthenticatedError', message: '' }, req, res, next)
+        next(new Error('UnauthenticatedError'))
+        return
       }
 
       const decodedToken = jwt.verify(token.split(' ')[1], env.jwtSecret) as JwtInterface
       const user: UserModel | null = await User.findById(decodedToken._id)
 
       if (!user) {
-        return errorHandler({ name: 'UnauthenticatedError', message: '' }, req, res, next)
+        next(new Error('UnauthenticatedError'))
+        return
       }
       req.params.userId = user.id
 
       if (roles.length && !roles.includes(user.role)) {
-        return errorHandler({ name: 'UnauthorizedError', message: '' }, req, res, next)
+        next(new UnauthorizedError())
+        return
       }
       next()
     }

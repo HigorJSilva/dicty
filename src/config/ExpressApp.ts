@@ -1,8 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import { routes } from '../routes/routes'
-import errorHandler from '@/helpers/ErrorHandler'
 import env from './env'
+import { errorHandler } from '@/middlewares/ErrorHandler'
 
 const application = express()
 

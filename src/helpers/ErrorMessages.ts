@@ -1,3 +1,5 @@
+import { ValidationError } from './ValidationError'
+
 export const requiredMessage = 'Required field'
 export const invalidEmailMessage = 'Invalid e-mail'
 export const uniqueMessage = (resource: string): string => { return `${resource} already in use` }
@@ -17,12 +19,4 @@ export const fieldSizeMessage = (min?: number | null, max?: number): string => {
     return `Field needs to be less than ${max} characters long`
   }
   return ''
-}
-
-export class ValidationError extends Error {
-  constructor (resource: string) {
-    super()
-    this.name = 'ValidationError'
-    this.message = resource
-  }
 }
