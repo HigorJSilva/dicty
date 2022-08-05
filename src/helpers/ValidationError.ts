@@ -9,7 +9,7 @@ export class ValidationError extends Error {
   }
 }
 
-export default function makeValidationErrorResponse (response: Response, err: Error): any {
+export default function makeValidationErrorResponse (response: Response, err: Error): Response {
   return response.status(422).json(
     ApiResponse(
       false,

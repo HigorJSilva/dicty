@@ -8,7 +8,7 @@ export class UnauthorizedError extends Error {
   }
 }
 
-export default function makeUnauthorizedErrorResponse (response: Response): any {
+export default function makeUnauthorizedErrorResponse (response: Response): Response {
   return response.status(403).json(
     ApiResponse(
       false,

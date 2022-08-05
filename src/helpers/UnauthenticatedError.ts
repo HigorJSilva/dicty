@@ -8,7 +8,7 @@ export class UnauthenticatedError extends Error {
   }
 }
 
-export default function makeUnauthenticatedErrorResponse (response: Response): any {
+export default function makeUnauthenticatedErrorResponse (response: Response): Response {
   return response.status(401).json(
     ApiResponse(
       false,
