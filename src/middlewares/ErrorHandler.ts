@@ -1,7 +1,7 @@
+import makeInternalErrorResponse from '@/helpers/InternalError'
 import makeUnauthenticatedErrorResponse from '@/helpers/UnauthenticatedError'
 import makeUnauthorizedErrorResponse from '@/helpers/UnauthorizedError'
 import makeValidationErrorResponse, { ValidationError } from '@/helpers/ValidationError'
-import { ApiResponse } from '@/middlewares/helpers/HttpResponse'
 import { NextFunction, Request, Response } from 'express'
 
 export function errorHandler (error: Error, _request: Request, response: Response, _next: NextFunction
@@ -17,13 +17,6 @@ export function errorHandler (error: Error, _request: Request, response: Respons
       return makeValidationErrorResponse(response, error as ValidationError)
 
     default:
-      return response.status(500).json(
-        ApiResponse(
-          false,
-          'Internal server error',
-          null,
-          null
-        )
-      )
+      return makeInternalErrorResponse(response, error)
   }
 }
