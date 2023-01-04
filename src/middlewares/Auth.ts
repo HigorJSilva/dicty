@@ -4,6 +4,7 @@ import env from '@/config/env'
 import User, { UserModel } from '@/models/UserModel'
 import { JwtInterface } from './interfaces/user/jwtInterface'
 import { UnauthorizedError } from '@/helpers/UnauthorizedError'
+import { UnauthenticatedError } from '@/helpers/UnauthenticatedError'
 
 export function authorize (roles: string[] | string = []): any {
   if (typeof roles === 'string') {
@@ -15,7 +16,7 @@ export function authorize (roles: string[] | string = []): any {
       const token = req.headers.authorization as string
 
       if (!token) {
-        next(new Error('UnauthenticatedError'))
+        next(new UnauthenticatedError())
         return
       }
 
@@ -23,7 +24,7 @@ export function authorize (roles: string[] | string = []): any {
       const user: UserModel | null = await User.findById(decodedToken._id)
 
       if (!user) {
-        next(new Error('UnauthenticatedError'))
+        next(new UnauthenticatedError())
         return
       }
       req.params.userId = user.id
